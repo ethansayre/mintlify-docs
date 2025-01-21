@@ -29,12 +29,12 @@
     {
       "name": "Backend API Reference",
       "url": "backend-api-reference",
-      "openapi": "backendSwagger.json"
+      "openapi": "/backendSwagger.json"
     },
     {
       "name": "Client API Reference",
       "url": "client-api-reference",
-      "openapi": "clientSwagger.json"
+      "openapi": "/clientSwagger.json"
     }
   ],
   "navigation": [
