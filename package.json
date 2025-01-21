@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@mintlify/scraping": "4.0.43",
+    "openapi-types": "^12.1.3"
+  },
+  "scripts": {
+    "generate:client-docs": "npx @mintlify/scraping@4.0.43 openapi-file clientSwagger.json -o client-api-reference",
+    "generate:backend-docs": "npx @mintlify/scraping@4.0.43 openapi-file backendSwagger.json -o backend-api-reference"
+  }
+}

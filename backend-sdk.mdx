@@ -1,0 +1,348 @@
+---
+title: 'Tripedge Backend SDK'
+description: 'Documentation for the Tripedge Backend SDK'
+---
+
+The Tripedge Backend SDK provides endpoints for managing users, bookings, and accounting entries. All endpoints require authentication.
+
+## Base URL
+
+```
+/api
+```
+
+## Authentication
+
+All endpoints are secured and require authentication. Include your authentication token in the request headers.
+  ```typescript Example Authentication with the Backend API
+const { TripedgeBackendAPI } = require("./tripedge.backend.api");
+
+const client = new TripedgeBackendAPI({
+    baseURL: "https://api.tripedge.com/api",
+    headers: {
+        "Authorization": "YOUR_AUTH_TOKEN",
+    },
+});
+```
+
+## Users
+
+### Create User
+Create a new user account.
+
+<CodeGroup>
+  ```typescript Create a New User
+  interface CreateUserPayload {
+    firstName: string;     // Required, non-empty
+    lastName: string;      // Required, non-empty
+    email: string;        // Required, valid email format
+    phone: string;        // Required, non-empty
+    clientAccountLimit: number; // Required, minimum 0
+  }
+
+  // Create a new user
+  const createResponse = await client.user.createUser({
+      firstName: "Test",
+      lastName: "User",
+      email: "test@example.com",
+      phone: "1234567890",
+      clientAccountLimit: 1000
+  });
+
+  if (!createResponse.data?.id) {
+      throw new Error("Failed to create user");
+  }
+
+  const userId = createResponse.data.id.toString();
+  ```
+</CodeGroup>
+
+#### Response
+
+```typescript
+{
+  success?: boolean;
+  message?: string | null;
+  data?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    clientAccountLimit: string;
+    createdAt: string;    // date-time
+    updatedAt: string;    // date-time
+    deletedAt: string | null;
+  }
+}
+```
+
+### Get User by ID
+
+Retrieve user information by their ID.
+
+<CodeGroup>
+```typescript GET /user/{id}
+// Path Parameters
+id: string    // User ID
+
+const getUserResponse = await client.user.getUserById(userId);
+```
+</CodeGroup>
+
+#### Response
+Returns the same structure as Create User response.
+
+### Update User
+
+Update an existing user's information.
+
+<CodeGroup>
+```typescript PUT /user/{id}
+interface UpdateUserPayload {
+  firstName?: string;     // Non-empty if provided
+  lastName?: string;      // Non-empty if provided
+  email?: string;        // Valid email format if provided
+  phone?: string;        // Non-empty if provided
+  clientAccountLimit?: string;
+}
+
+// Update a user
+const updateResponse = await client.user.updateUser(userId, {
+    firstName: "Updated",
+    lastName: "User",
+    email: "updated@example.com",
+    phone: "0987654321",
+    clientAccountLimit: "2000"
+});
+```
+</CodeGroup>
+
+#### Response
+Returns the same structure as Create User response.
+
+### Get User Token
+
+Retrieve an authentication token for a user.
+
+<CodeGroup>
+```typescript GET /user/{id}/token
+// Path Parameters
+id: string    // User ID
+
+const getTokenResponse = await client.user.getUserToken(userId);
+```
+</CodeGroup>
+
+#### Response
+```typescript
+{
+  success?: boolean;
+  message?: string | null;
+  data?: {
+    token: string;
+    expiresAt: string;    // date-time
+  }
+}
+```
+
+## Bookings
+
+### Get All Bookings
+
+Retrieve all bookings for the authenticated client and user.
+
+<CodeGroup>
+```typescript GET /booking
+// No parameters required
+
+const response = await api.booking.getBookings();
+if (response.data) {
+  console.log(response.data);
+}
+```
+</CodeGroup>
+
+#### Response
+```typescript
+{
+  success?: boolean;
+  message?: string | null;
+  data?: Array<{
+    id: number;
+    status: "confirmed" | "pending" | "cancelled";
+    voucher: string;
+    hotelId: number;
+    checkIn: string;
+    checkOut: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    lines: Array<{
+      lineText: string;
+      amount: string;
+    }>;
+    pricePerNight: string;
+    priceFees: string;
+    priceDueAtHotel: string;
+    priceInclusive: string;
+    priceChargeable: string;
+    currency: string;
+    remarks: string;
+    roomType: string;
+    cancellationPolicy: string;
+    cancellationPolicyDate: string;
+    rooms: Array<{
+      adults: Array<{
+        title: string;
+        firstName: string;
+        lastName: string;
+      }>;
+      children: Array<{
+        title: string;
+        firstName: string;
+        lastName: string;
+        age: number;
+      }>;
+    }>;
+    clientCommission: string;
+    paymentMethod: "creditCard" | "account";
+    userId: number;
+    hotel: {
+      id: number;
+      name: string;
+      stars: number;        // 1-5
+      coordinates?: [number, number];
+      address: {
+        address?: string;
+        postalCode?: string;
+        city?: string;
+        country?: string;
+      };
+      rating: number;       // 0-5
+      reviews: number;      // min 0
+      pricePerNight: string;
+      priceFees: string;
+      priceDueAtHotel: string;
+      priceInclusive: string;
+      priceChargeable: string;
+      amenities: string[];
+      location: string;
+      images: string[];
+      exclusive: boolean;
+      type: string;
+    };
+  }>;
+}
+```
+
+### Get Bookings by User ID
+
+Retrieve all bookings for a specific user.
+
+<CodeGroup>
+```typescript GET /booking/user/{userId}
+// Path Parameters
+userId: string    // ID of the user to get bookings for
+```
+</CodeGroup>
+
+#### Response
+Returns the same structure as Get All Bookings response.
+
+## Accounting
+
+### Create Accounting Entry
+
+Create a new accounting entry.
+
+<CodeGroup>
+```typescript POST /accounting
+interface CreateAccountingEntryPayload {
+  debit: number;          // minimum 0
+  credit: number;         // minimum 0
+  name: string;           // Required, non-empty
+  clientId: number;       // Required
+  bookingId?: number;
+  ccPaymentId?: string;
+  userId?: number;
+  bankPaymentId?: number;
+}
+```
+</CodeGroup>
+
+#### Response
+```typescript
+{
+  success?: boolean;
+  message?: string | null;
+  data?: {
+    id: number;
+    debit: number;
+    credit: number;
+    name: string;
+    clientId: number;
+    bookingId: number;
+    ccPaymentId: string;
+    userId: number;
+    bankPaymentId: number;
+    createdAt: string;    // date-time
+    updatedAt: string;    // date-time
+    deletedAt: string;
+  }
+}
+```
+
+### Get All Accounting Entries
+
+Retrieve all accounting entries for the authenticated client.
+
+<CodeGroup>
+```typescript GET /accounting
+// No parameters required
+```
+</CodeGroup>
+
+#### Response
+Returns an array of accounting entries with the same structure as Create Accounting Entry response.
+
+### Get Accounting Entry by ID
+
+Retrieve a specific accounting entry by its ID.
+
+<CodeGroup>
+```typescript GET /accounting/{id}
+// Path Parameters
+id: string    // Accounting entry ID
+```
+</CodeGroup>
+
+#### Response
+Returns the same structure as Create Accounting Entry response.
+
+### Get Accounting Entries by Booking ID
+
+Retrieve all accounting entries associated with a specific booking.
+
+<CodeGroup>
+```typescript GET /accounting/booking/{bookingId}
+// Path Parameters
+bookingId: string    // ID of the booking
+```
+</CodeGroup>
+
+#### Response
+Returns an array of accounting entries with the same structure as Create Accounting Entry response.
+
+## Error Responses
+
+All endpoints may return an error response in the following format:
+
+```typescript
+{
+  success: false;
+  message: string;
+  data: null;
+}
+```

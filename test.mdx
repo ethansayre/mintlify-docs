@@ -1,0 +1,302 @@
+---
+title: 'Tripedge Client SDK'
+description: 'Documentation for the Tripedge Client SDK'
+---
+
+The Tripedge Client SDK provides a TypeScript/JavaScript client for interacting with the Tripedge platform. It includes methods for searching hotels, managing bookings, and handling availability searches.
+
+## Installation
+
+```bash
+npm install @tripedge/client-sdk
+```
+
+## Authentication
+
+The SDK requires authentication for all endpoints. Here's how to initialize the client with authentication:
+
+```typescript
+import { TripedgeClientAPI } from "@tripedge/client-sdk";
+
+class CustomizedTripedgeClientAPI extends TripedgeClientAPI<SecurityDataType> {
+  constructor(config: { baseURL: string; apiKey: string }) {
+    super(config);
+    this.instance.defaults.headers.common['Authorization'] = config.apiKey;
+  }
+}
+
+export const tripedgeApi = new CustomizedTripedgeClientAPI({
+  baseURL: process.env.NEXT_PUBLIC_API_URL || '',
+  apiKey: process.env.NEXT_PUBLIC_API_KEY || ''
+});
+```
+
+## Core Features
+
+### Destination Search
+
+Search for destinations using a query string:
+
+```typescript
+const response = await tripedgeApi.destinations.searchDestinations({
+  query: "London"
+});
+
+// Response type
+interface DestinationsSearchResponse {
+  id: number;
+  name: string;
+  countryName: string;
+  state: string;
+}[]
+```
+
+### Availability Search
+
+Search for hotel availability using various criteria:
+
+```typescript
+// New search (no session)
+const searchBody = {
+  destinationId: 123,
+  checkIn: "2024-06-01",
+  checkOut: "2024-06-07",
+  rooms: [{
+    adults: 2,
+    children: 1,
+    childrenAges: [10]
+  }],
+  filters: {
+    starRating: [4, 5],
+    propertyTypes: ["Hotel", "Resort"],
+    sortBy: "price_low"
+  }
+};
+
+const response = await tripedgeApi.availability.searchAvailability(searchBody);
+
+// Using existing session
+const sessionResponse = await tripedgeApi.availability.searchAvailabilityWithSessionId(
+  sessionId,
+  searchBody
+);
+
+// Get results by session ID
+const availabilityResponse = await tripedgeApi.availability.getAvailabilityBySessionId(sessionId);
+```
+
+### Hotel Details
+
+Retrieve detailed information about a specific hotel:
+
+```typescript
+const response = await tripedgeApi.hotel.getHotelDetails(
+  sessionId,
+  hotelId
+);
+
+interface HotelDetailsResponse {
+  hotel: {
+    id: number;
+    name: string;
+    stars: number;  // 1-5
+    coordinates?: [number, number];
+    address: {
+      street?: string;
+      street2?: string;
+      street3?: string;
+      postalCode?: string;
+      city?: string;
+      state?: string;
+      country?: string;
+      countryCode?: string;
+    };
+    rating: number;  // 0-5
+    reviews: number;
+    pricePerNight: string;
+    priceFees: string;
+    priceDueAtHotel: string;
+    priceInclusive: string;
+    priceChargeable: string;
+    amenities: string[];
+    location: string;
+    images: string[];
+    exclusive: boolean;
+    type: string;
+  };
+  rates: Array<{
+    id: string;  // UUID
+    roomType: string;
+    board: string;
+    pricePerNight: string;
+    priceFees: string;
+    priceDueAtHotel: string;
+    priceInclusive: string;
+    priceChargeable: string;
+    currency: string;
+    cancellationPolicy: string;
+    cancellationPolicyDate: string;
+  }>;
+  metadata: {
+    nights: number;
+  };
+}
+```
+
+### Booking Management
+
+#### Create Pre-booking
+
+Initialize a pre-booking for a hotel:
+
+```typescript
+const response = await tripedgeApi.prebook.createPreBooking(
+  sessionId,
+  hotelId,
+  rateId,
+  "creditCard"
+);
+```
+
+#### Create Booking
+
+Create a final booking:
+
+```typescript
+const bookingPayload = {
+  rooms: [{
+    adults: [{
+      title: "Mr",
+      firstName: "John",
+      lastName: "Doe"
+    }],
+    children: [{
+      title: "Miss",
+      firstName: "Jane",
+      lastName: "Doe",
+      age: 10
+    }]
+  }],
+  email: "john.doe@example.com",
+  phone: "1234567890",
+  paymentNonce: "payment_nonce_here"
+};
+
+const response = await tripedgeApi.book.createBooking(
+  sessionId,
+  hotelId,
+  rateId,
+  "creditCard",
+  bookingPayload
+);
+```
+
+#### Get All Bookings
+
+Retrieve all bookings:
+
+```typescript
+const response = await tripedgeApi.book.getAllBookings();
+```
+
+#### Cancel Booking
+
+Cancel an existing booking:
+
+```typescript
+// Check cancellation fee first
+const cancelDetails = await tripedgeApi.book.getCancellationDetails(bookingId);
+
+// Proceed with cancellation
+await tripedgeApi.book.cancelBooking(bookingId);
+```
+
+## Types
+
+### Common Types
+
+```typescript
+type PropertyType = "Hotel" | "Bed & breakfast" | "Aparthotel" | "Resort" | "Villa";
+type PaymentMethod = "creditCard" | "account";
+type BookingStatus = "confirmed" | "pending" | "cancelled";
+type SortOption = "price_low" | "price_high" | "rating" | "distance";
+type Title = "Mr" | "Mrs" | "Ms" | "Miss";
+```
+
+### Search Types
+
+```typescript
+interface AvailabilityFilter {
+  priceRange?: any;
+  starRating?: number[];
+  propertyTypes?: PropertyType[];
+  amenities?: string[];
+  roomType?: string;
+  sortBy?: SortOption;
+}
+
+interface RoomConfig {
+  adults: number;      // 1-14
+  children: number;    // 0-6
+  childrenAges: number[];
+}
+
+interface SearchAvailabilityPayload {
+  destinationId: number;
+  checkIn: string;     // YYYY-MM-DD
+  checkOut: string;    // YYYY-MM-DD
+  rooms: RoomConfig[];
+  filters?: AvailabilityFilter;
+}
+```
+
+### Booking Types
+
+```typescript
+interface BookingGuest {
+  title: Title;
+  firstName: string;
+  lastName: string;
+}
+
+interface BookingChild extends BookingGuest {
+  age: number;        // 0-17
+}
+
+interface CreateBookingPayload {
+  rooms: Array<{
+    adults: BookingGuest[];
+    children: BookingChild[];
+  }>;
+  email: string;
+  phone: string;
+  paymentNonce?: string;
+}
+```
+
+## Error Handling
+
+All API responses include a standard format:
+
+```typescript
+interface ApiResponse<T> {
+  success?: boolean;
+  message?: string | null;
+  data?: T;
+}
+```
+
+Handle errors by checking the success flag and message:
+
+```typescript
+try {
+  const response = await tripedgeApi.availability.searchAvailability(searchBody);
+  if (!response.success) {
+    throw new Error(response.message || 'Unknown error');
+  }
+  // Handle successful response
+} catch (error) {
+  // Handle error
+  console.error('API Error:', error);
+}
+```

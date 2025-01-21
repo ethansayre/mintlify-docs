@@ -1,0 +1,162 @@
+ // Start of Selection
+---
+title: 'Client SDK'
+description: 'TypeScript SDK for the Tripedge API'
+---
+
+## Overview
+
+The Tripedge TypeScript SDK provides a strongly-typed client for interacting with the Tripedge API. It includes methods for managing users, bookings, and accounting entries.
+
+## Installation
+
+To install the Tripedge TypeScript SDK, you can use either npm or yarn:
+
+### Using npm
+
+```bash
+npm install tripedge-sdk
+```
+
+### Using yarn
+
+```bash
+yarn add tripedge-sdk
+```
+
+## Getting Started
+
+After installing the SDK, you can import and initialize it in your project:
+
+```typescript
+import { TripedgeBackendAPI, CreateUserPayload } from 'tripedge-sdk';
+
+// Initialize the API client
+const api = new TripedgeBackendAPI();
+
+// Example: Creating a new user
+const createUserPayload: CreateUserPayload = {
+  firstName: 'John',
+  lastName: 'Doe',
+  email: 'john.doe@example.com',
+  phone: '1234567890',
+  clientAccountLimit: 1000,
+};
+
+api.user.createUser(createUserPayload)
+  .then(response => {
+    if (response.success && response.data) {
+      console.log('User created:', response.data);
+    } else {
+      console.error('Error creating user:', response.message);
+    }
+  })
+  .catch(error => {
+    console.error('API error:', error);
+  });
+```
+
+## Usage
+
+### Managing Users
+
+- **Create a User**
+
+  ```typescript
+  const newUser: CreateUserPayload = {
+    firstName: 'Jane',
+    lastName: 'Smith',
+    email: 'jane.smith@example.com',
+    phone: '0987654321',
+    clientAccountLimit: 5000,
+  };
+
+  api.user.createUser(newUser)
+    .then(response => {
+      // Handle response
+    });
+  ```
+
+- **Get User by ID**
+
+  ```typescript
+  const userId = '123';
+
+  api.user.getUserById(userId)
+    .then(response => {
+      // Handle response
+    });
+  ```
+
+- **Update User**
+
+  ```typescript
+  const updatedUser: UpdateUserPayload = {
+    email: 'jane.newemail@example.com',
+  };
+
+  api.user.updateUser(userId, updatedUser)
+    .then(response => {
+      // Handle response
+    });
+  ```
+
+### Managing Bookings
+
+- **Get All Bookings**
+
+  ```typescript
+  api.booking.getBookings()
+    .then(response => {
+      // Handle response
+    });
+  ```
+
+- **Get Bookings by User ID**
+
+  ```typescript
+  const userId = '123';
+
+  api.booking.getBookingsByUserId(userId)
+    .then(response => {
+      // Handle response
+    });
+  ```
+
+### Managing Accounting Entries
+
+- **Create Accounting Entry**
+
+  ```typescript
+  const newEntry: CreateAccountingEntryPayload = {
+    debit: 1000,
+    credit: 0,
+    name: 'Service Fee',
+    clientId: 1,
+    // Other optional fields
+  };
+
+  api.accounting.createAccountingEntry(newEntry)
+    .then(response => {
+      // Handle response
+    });
+  ```
+
+- **Get All Accounting Entries**
+
+  ```typescript
+  api.accounting.getAccountingEntries()
+    .then(response => {
+      // Handle response
+    });
+  ```
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request on [GitHub](https://github.com/your-repo/tripedge-sdk).
+
+## License
+
+This project is licensed under the MIT License.
+
+

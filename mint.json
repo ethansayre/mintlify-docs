@@ -1,51 +1,40 @@
 {
   "$schema": "https://mintlify.com/schema.json",
-  "name": "Starter Kit",
+  "name": "Tripedge API",
   "logo": {
-    "dark": "/logo/dark.svg",
-    "light": "/logo/light.svg"
+    "dark": "/logo/TripedgeA.png",
+    "light": "/logo/TripedgeA.png"
   },
   "favicon": "/favicon.svg",
   "colors": {
-    "primary": "#0D9373",
-    "light": "#07C983",
-    "dark": "#0D9373",
+    "primary": "#1E3A8A",
+    "light": "#3B82F6",
+    "dark": "#1E3A8A", 
     "anchors": {
-      "from": "#0D9373",
-      "to": "#07C983"
+      "from": "#1E3A8A",
+      "to": "#3B82F6"
     }
   },
   "topbarLinks": [
     {
       "name": "Support",
-      "url": "mailto:hi@mintlify.com"
+      "url": "mailto:integrations@tripedge.com"
     }
   ],
   "topbarCtaButton": {
-    "name": "Dashboard",
-    "url": "https://dashboard.mintlify.com"
+    "name": "Platform",
+    "url": "https://platform.tripedge.com"
   },
   "tabs": [
     {
-      "name": "API Reference",
-      "url": "api-reference"
-    }
-  ],
-  "anchors": [
-    {
-      "name": "Documentation",
-      "icon": "book-open-cover",
-      "url": "https://mintlify.com/docs"
+      "name": "Backend API Reference",
+      "url": "backend-api-reference",
+      "openapi": "backendSwagger.json"
     },
     {
-      "name": "Community",
-      "icon": "slack",
-      "url": "https://mintlify.com/community"
-    },
-    {
-      "name": "Blog",
-      "icon": "newspaper",
-      "url": "https://mintlify.com/blog"
+      "name": "Client API Reference",
+      "url": "client-api-reference",
+      "openapi": "clientSwagger.json"
     }
   ],
   "navigation": [
@@ -54,32 +43,39 @@
       "pages": [
         "introduction",
         "quickstart",
-        "development"
+        "backend-sdk",
+        "client-sdk"
       ]
     },
     {
-      "group": "Essentials",
+      "group": "Backend API Reference",
       "pages": [
-        "essentials/markdown",
-        "essentials/code",
-        "essentials/images",
-        "essentials/settings",
-        "essentials/navigation",
-        "essentials/reusable-snippets"
+        "backend-api-reference/create-a-new-user",
+        "backend-api-reference/get-user-by-id",
+        "backend-api-reference/update-user-by-id",
+        "backend-api-reference/get-user-token-by-id",
+        "backend-api-reference/get-all-bookings-for-authenticated-client-and-user",
+        "backend-api-reference/get-all-bookings-for-a-specific-user",
+        "backend-api-reference/get-all-accounting-entries-for-authenticated-client",
+        "backend-api-reference/create-a-new-accounting-entry",
+        "backend-api-reference/get-accounting-entry-by-id",
+        "backend-api-reference/get-accounting-entries-by-booking-id"
       ]
     },
     {
-      "group": "API Documentation",
+      "group": "Client API Reference",
       "pages": [
-        "api-reference/introduction"
-      ]
-    },
-    {
-      "group": "Endpoint Examples",
-      "pages": [
-        "api-reference/endpoint/get",
-        "api-reference/endpoint/create",
-        "api-reference/endpoint/delete"
+        "client-api-reference/search-destinations",
+        "client-api-reference/search-for-hotel-availability",
+        "client-api-reference/get-search-results-by-session-id",
+        "client-api-reference/search-for-hotel-availability-with-session-id",
+        "client-api-reference/get-hotel-details",
+        "client-api-reference/create-a-pre-booking",
+        "client-api-reference/create-a-booking",
+        "client-api-reference/get-all-bookings",
+        "client-api-reference/get-cancellation-details",
+        "client-api-reference/cancel-a-booking",
+        "client-api-reference/get-booking-voucher"
       ]
     }
   ],

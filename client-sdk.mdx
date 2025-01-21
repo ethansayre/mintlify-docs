@@ -1,0 +1,366 @@
+---
+title: 'Tripedge Client SDK'
+description: 'Documentation for the Tripedge Client SDK'
+---
+
+The Tripedge Client API provides a client-side SDK for interacting with the Tripedge platform. It includes methods for searching hotels, managing bookings, and handling user authentication. The API is designed to be used in browser-based applications and requires a valid API key for authentication.
+
+## Base URL
+
+```
+/api
+```
+
+## Authentication
+
+All endpoints are secured and require authentication using a user-specific token. The token needs to be refreshed periodically to maintain access. Below is an example of how to wrap the API client to handle token expiration and automatic refresh:
+
+```typescript Example Authentication with the Client API
+import { TripedgeClientAPI } from "./tripedge.client.api";
+
+// Define SecurityDataType to match the expected structure
+interface SecurityDataType {
+  ApiKeyAuth: string;
+}
+
+interface RequestConfig {
+  url?: string;
+  method?: string;
+  headers?: Record<string, string>;
+  data?: unknown;
+  params?: Record<string, string>;
+}
+
+class CustomizedTripedgeClientAPI extends TripedgeClientAPI<SecurityDataType> {
+  private tokenExpiresAt: Date | null = null;
+  private lastRequest: { config: RequestConfig } | null = null;
+  private isRefreshingToken = false;
+
+  constructor(config: { baseURL: string; apiKey: string, expiresAt: Date }) {
+    super(config);
+    // Convert headers to SecurityDataType format
+    this.instance.defaults.headers.common['Authorization'] = process.env.NEXT_PUBLIC_API_KEY || '';
+    this.tokenExpiresAt = config.expiresAt;
+
+    // Intercept requests to store last request config and check token
+    this.instance.interceptors.request.use((config) => {
+      this.checkTokenExpiration();
+      this.lastRequest = { config };
+      return config;
+    });
+
+    // Intercept responses to handle unauthorized errors
+    this.instance.interceptors.response.use(
+      (response) => {
+        // Reset the refresh flag on successful response
+        this.isRefreshingToken = false;
+        return response;
+      },
+      async (error) => {
+        if (error.response?.data?.message === "Unauthorized" && !this.isRefreshingToken) {
+          return this.handleUnauthorized();
+        }
+        throw error;
+      }
+    );
+  }
+
+  private async handleUnauthorized(): Promise<unknown> {
+    this.isRefreshingToken = true;
+    const newToken = 'NEW TOKEN'; // PUT YOUR LOGIC HERE TO GET A NEW TOKEN
+    // Set security data in correct format
+    this.instance.defaults.headers.common['Authorization'] = newToken || '';
+    this.tokenExpiresAt = new Date(Date.now() + 3600 * 1000);
+
+    // Resend last failed request if available, but only once
+    if (this.lastRequest) {
+      const { config } = this.lastRequest;
+      // Clear last request to prevent retry loops
+      this.lastRequest = null;
+      // Update token in the stored request
+      config.headers = config.headers || {};
+      config.headers['Authorization'] = newToken;
+      // The response interceptor will handle resetting isRefreshingToken
+      return this.instance.request(config);
+    }
+    // Reset isRefreshingToken if we're not making another request
+    this.isRefreshingToken = false;
+    return null;
+  }
+
+  private checkTokenExpiration(): void {
+    if (this.tokenExpiresAt && new Date() > this.tokenExpiresAt && !this.isRefreshingToken) {
+      this.handleUnauthorized();
+    }
+  }
+}
+
+export const tripedgeApi = new CustomizedTripedgeClientAPI({
+  baseURL: process.env.NEXT_PUBLIC_API_URL || '',
+  apiKey: 'STARTING USER TOKEN',
+  expiresAt: new Date(Date.now() + 3600 * 1000) // 1 hour expiry
+});
+```
+## Core Features
+
+### Destination Search
+
+Search for destinations using a query string:
+
+```typescript
+const response = await tripedgeApi.destinations.searchDestinations({
+  query: "New York"
+});
+
+// Response type
+interface DestinationsSearchResponse {
+  id: string;
+  name: string;
+}>;
+```
+
+### Availability Search
+
+Search for hotel availability using various criteria:
+
+```typescript
+// New search (no session)
+const searchBody = {
+  destinationId: "C123",
+  checkIn: "2024-06-01",
+  checkOut: "2024-06-07",
+  rooms: [{
+    adults: 2,
+    children: 1,
+    childrenAges: [10]
+  }],
+  filters: {
+    starRating: [4, 5],
+    propertyTypes: [],
+    sortBy: "price_low"
+  }
+};
+
+const response = await tripedgeApi.availability.searchAvailability(searchBody);
+
+// Using existing session
+const sessionResponse = await tripedgeApi.availability.searchAvailabilityWithSessionId(
+  sessionId,
+  searchBody
+);
+
+// Get results by session ID
+const availabilityResponse = await tripedgeApi.availability.getAvailabilityBySessionId(sessionId);
+```
+
+### Hotel Details
+
+Retrieve detailed information about a specific hotel:
+
+```typescript
+const response = await tripedgeApi.hotel.getHotelDetails(
+  sessionId,
+  hotelId
+);
+
+interface HotelDetailsResponse {
+  hotel: {
+    id: number;
+    name: string;
+    stars: number;  // 1-5
+    coordinates?: [number, number];
+    address: {
+      address?: string;
+      city?: string;
+      postalCode?: string;
+      country?: string;
+    };
+    rating: number;  // 0-5
+    reviews: number;
+    pricePerNight: string;
+    priceFees: string;
+    priceDueAtHotel: string;
+    priceInclusive: string;
+    priceChargeable: string;
+    amenities: string[];
+    location: string;
+    images: string[];
+    exclusive: boolean;
+    type: string;
+  };
+  rates: Array<{
+    id: string;
+    roomType: string;
+    board: string;
+    pricePerNight: string;
+    priceFees: string;
+    priceDueAtHotel: string;
+    priceInclusive: string;
+    priceChargeable: string;
+    currency: string;
+    cancellationPolicy: string;
+    cancellationPolicyDate: string;
+  }>;
+  metadata: {
+    nights: number;
+  };
+}
+```
+
+### Booking Management
+
+#### Create Pre-booking
+
+Initialize a pre-booking for a hotel:
+
+```typescript
+const response = await tripedgeApi.prebook.createPreBooking(
+  sessionId,
+  hotelId,
+  rateId,
+  "creditCard"
+);
+```
+
+#### Create Booking
+
+Create a final booking:
+
+```typescript
+const bookingPayload = {
+  rooms: [{
+    adults: [{
+      title: "Mr",
+      firstName: "John",
+      lastName: "Doe"
+    }],
+    children: [{
+      title: "Miss",
+      firstName: "Jane",
+      lastName: "Doe",
+      age: 10
+    }]
+  }],
+  email: "john.doe@example.com",
+  phone: "1234567890",
+  paymentNonce: "payment_nonce_here"
+};
+
+const response = await tripedgeApi.book.createBooking(
+  sessionId,
+  hotelId,
+  rateId,
+  "creditCard",
+  bookingPayload
+);
+```
+
+#### Get All Bookings
+
+Retrieve all bookings:
+
+```typescript
+const response = await tripedgeApi.book.getAllBookings();
+```
+
+#### Cancel Booking
+
+Cancel an existing booking:
+
+```typescript
+// Check cancellation fee first
+const cancelDetails = await tripedgeApi.book.getCancellationDetails(bookingId);
+
+// Proceed with cancellation
+await tripedgeApi.book.cancelBooking(bookingId);
+```
+
+## Types
+
+### Common Types
+
+```typescript
+type PropertyType = "Hotel" | "Aparthotel";
+type PaymentMethod = "creditCard" | "account";
+type BookingStatus = "confirmed" | "pending" | "cancelled";
+type SortOption = "price_low" | "price_high" | "rating" | "distance";
+type Title = "Mr" | "Mrs" | "Ms" | "Miss";
+```
+
+### Search Types
+
+```typescript
+interface AvailabilityFilter {
+  priceRange?: any;
+  starRating?: number[];
+  propertyTypes?: PropertyType[];
+  amenities?: string[];
+  roomType?: string;
+  sortBy?: SortOption;
+}
+
+interface RoomConfig {
+  adults: number;      // 1-14
+  children: number;    // 0-6
+  childrenAges: number[];
+}
+
+interface SearchAvailabilityPayload {
+  destinationId: number;
+  checkIn: string;     // YYYY-MM-DD
+  checkOut: string;    // YYYY-MM-DD
+  rooms: RoomConfig[];
+  filters?: AvailabilityFilter;
+}
+```
+
+### Booking Types
+
+```typescript
+interface BookingGuest {
+  title: Title;
+  firstName: string;
+  lastName: string;
+}
+
+interface BookingChild extends BookingGuest {
+  age: number;        // 0-17
+}
+
+interface CreateBookingPayload {
+  rooms: Array<{
+    adults: BookingGuest[];
+    children: BookingChild[];
+  }>;
+  email: string;
+  phone: string;
+  paymentNonce?: string;
+}
+```
+
+## Error Handling
+
+All API responses include a standard format:
+
+```typescript
+interface ApiResponse<T> {
+  success?: boolean;
+  message?: string | null;
+  data?: T;
+}
+```
+
+Handle errors by checking the success flag and message:
+
+```typescript
+try {
+  const response = await tripedgeApi.availability.searchAvailability(searchBody);
+  if (!response.success) {
+    throw new Error(response.message || 'Unknown error');
+  }
+  // Handle successful response
+} catch (error) {
+  // Handle error
+  console.error('API Error:', error);
+}
+```
