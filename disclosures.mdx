@@ -1,0 +1,49 @@
+## Required Disclosures for Display
+
+### Taxes and Fees Disclosure
+This disclosure must be shown as a tooltip on any "Taxes and fees" line item that appears on both the checkout page and hotel details page:
+<AccordionGroup>
+  <Accordion icon="receipt" title="Taxes and Fees Disclosure" open={true}>
+    The total charge encompasses estimated tax payments made by both the service provider (hotel, car rental agency) and our company to relevant tax authorities for your reservation. These taxes may include sales, occupancy, and value-added taxes. The charge may also incorporate resort fees, cleaning fees, and service fees retained by our company, the hotel supplier, and/or the booking platform. The fee structure varies according to factors including geographical location, total amount, and booking method. Please refer to our terms and conditions for comprehensive details.
+  </Accordion>
+</AccordionGroup>
+
+This tooltip must be implemented on:
+- The hotel details page taxes and fees line item
+- The checkout page taxes and fees line item
+
+### Merchant of Record Disclosure
+The following disclosure must be included in the terms of service:
+<AccordionGroup>
+  <Accordion icon="building" title="Merchant of Record" open={true}>
+    You acknowledge that [Your Company Entity] is not the merchant of record on any reservations/purchases that you may make through the Travel Channel with a Supplier or Service Provider (including, without limitation, the OTA described below). While a charge on your Card statement for a reservation/purchase may reflect [Your Entity] Hotels or similar reference, if the charge is for a reservation with a Supplier or Service Provider, then that Supplier or Service Provider is the merchant of record.
+  </Accordion>
+</AccordionGroup>
+
+### Online Travel Agency Disclosure
+The following disclosure must be included in the terms of service:
+<AccordionGroup>
+  <Accordion icon="plane" title="Online Travel Agency" open={true}>
+    Online travel agency Service Providers include Tripedge Inc. ("OTA"), which is a business organized and operating in the United States that has been selected by us to provide you with the ability to search for and book certain travel services. Payment for reservations/purchases made through OTA shall be made to OTA, if OTA is the merchant of record, or to the applicable Supplier, if the Supplier is the merchant of record. The OTA's seller of travel registration numbers are: *California: 2162512-50.* Registration as a seller of travel does not constitute approval by the State of California. California law requires certain sellers of travel to have a trust account or bond. OTA has a bond issued by Travelers Casualty and Surety Company of Connecticut in the amount of US$100,000. OTA is not a participant in the TCRF.
+  </Accordion>
+</AccordionGroup>
+
+### Recovery Fund Disclosure
+The following disclosure must be included in the terms of service:
+<AccordionGroup>
+  <Accordion icon="shield" title="Recovery Fund for Consumers" open={true}>
+    Our seller of travel registration numbers are California CST#2162512-50 and Washington UBI#605-662-006.
+
+    California: Upon cancellation of the transportation or travel services, where the passenger is not at fault and has not cancelled in violation of any terms and conditions previously clearly and conspicuously disclosed and agreed to by the passenger, all sums paid to the seller of travel for services not provided will be promptly reimbursed to the passenger unless the passenger otherwise advises the seller of travel in writing, after cancellation. This provision does not apply where the seller of travel has remitted the payment from customer to another registered wholesale seller of travel or a carrier, without obtaining a refund and such other provider fails to provide the agreed-upon transportation or service. In this situation, the initial seller of travel must provide the passenger with a written statement accompanied by bank records establishing the disbursement of the customer payment, and if disbursed to a registered wholesaler of travel, proof of current registration of that wholesaler.
+
+    California law requires certain sellers of travel to have a trust account or bond. Tripedge has a bond issued by Travelers Casualty and Surety Company of Connecticut in the amount of $100,000. Tripedge is not a participant in the California Travel Consumer Restitution Fund.
+
+    Washington State: If transportation or other services are canceled by the seller of travel, all sums paid to the seller of travel for services not performed in accordance with the contract between the seller of travel and the purchaser will be refunded within 30 days of receiving the funds from the vendor with whom the services were arranged, or if the funds were not sent to the vendor, the funds shall be returned within 14 days after cancellation by the seller of travel to the purchaser unless the purchaser requests the seller of travel to apply the money to another travel product and/or date.
+  </Accordion>
+</AccordionGroup>
+
+### Seller of Travel Registration Numbers Display Requirement
+The seller of travel registration numbers (California CST#2162512-50 and Washington UBI#605-662-006) must be displayed at the bottom of any webpage that contains:
+- A hotel search box
+- A destination search box 
+- Any content related to the hotel booking solution
