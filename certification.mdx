@@ -1,0 +1,79 @@
+---
+title: 'Tripedge Certification Guide'
+description: 'Step-by-step certification guide with examples'
+---
+
+## Certification Checklist
+
+### 1. Basic Setup
+- [ ] Import and initialize Backend SDK with authentication
+- [ ] Import and initialize Client SDK with authentication
+- [ ] Verify all required disclosures are properly displayed
+- [ ] Confirm seller of travel registration numbers are visible on relevant pages
+
+### 2. User Management
+- [ ] Create a new user account
+- [ ] Retrieve user information
+- [ ] Update user details
+- [ ] Generate user authentication token
+
+### 3. Hotel Booking Flow
+- [ ] Search for destinations
+- [ ] Search for hotel availability
+- [ ] Retrieve hotel details
+- [ ] Create pre-booking
+- [ ] Display terms and conditions on checkout page
+- [ ] Complete final booking
+- [ ] Retrieve booking confirmation
+- [ ] Test booking cancellation
+
+### 4. Required Disclosures
+- [ ] Taxes and fees disclosure on hotel details page showing:
+  - Amount charged today (priceChargeable)
+  - Total amount including hotel fees (priceInclusive) 
+  - Amount due at hotel (priceDueAtHotel)
+- [ ] Taxes and fees disclosure on checkout page showing:
+  - Amount charged today (priceChargeable)
+  - Total amount including hotel fees (priceInclusive)
+  - Amount due at hotel (priceDueAtHotel)
+- [ ] Terms and conditions displayed on checkout page
+- [ ] Merchant of Record disclosure in terms of service
+- [ ] Online Travel Agency disclosure in terms of service
+- [ ] Recovery Fund disclosure in terms of service
+- [ ] Seller of travel registration numbers displayed properly
+
+## Required Test Bookings
+
+Complete the following test bookings to verify all functionality:
+
+1. Book 2 nights in New York:
+   - 2 adults
+   - 2 children (ages 5 and 15)
+   - Single room
+
+2. Book 5 nights in San Francisco:
+   - Room 1: 2 adults
+   - Room 2: 1 adult, 1 child (age 12)
+
+3. Book 3 nights in Orlando:
+   - Room 1: 2 adults, 2 children (ages 3 and 7)
+   - Room 2: 2 adults, 1 child (age 4)
+   - Room 3: 2 adults
+
+4. Book 1 night in Chicago:
+   - Single room
+   - 1 adult
+
+5. Book 4 nights in Maui, Hawaii:
+   - 3 identical rooms
+   - Each room: 2 adults
+   - Ocean view required
+
+6. Book 2 nights in Las Vegas:
+   - Room 1: 1 adult
+   - Room 2: 2 adults
+
+7. Book 7 nights in Miami:
+   - Single room
+   - 2 adults, 3 children (ages 4, 8, 16)
+   - Suite required

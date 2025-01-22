@@ -45,7 +45,8 @@
         "quickstart",
         "backend-sdk",
         "client-sdk",
-        "disclosures"
+        "disclosures",
+        "certification"
       ]
     },
     {
